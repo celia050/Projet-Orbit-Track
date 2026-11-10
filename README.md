@@ -14,9 +14,9 @@ Orbit Track permet de suivre les événements astronomiques à venir, de trouver
 
 | # | Membre | N° étudiant | GitHub | Feature majeure |
 |---|---|---|---|---|
-| 1 | Ritej BAABOURA | 42007200 | [@dontuseitiguess](https://github.com/dontuseitiguess) | Participation, forum et alertes |
-| 2 | Selma BAIBOU | 43001407 | [@selmabayb](https://github.com/selmabayb) | Carte Leaflet, export .ics, articles IA |
-| 3 | Celia CHIOUKH | 43006515 | [@celia050](https://github.com/celia050) | Import des événements, cache, lieu conseillé |
+| 1 | Selma BAIBOU | 43001407 | [@selmabayb](https://github.com/selmabayb) | Participation, forum et alertes |
+| 2 | Celia CHIOUKH | 43006515 | [@celia050](https://github.com/celia050) | Carte Leaflet, export .ics, articles IA |
+| 3 | Ritej BAABOURA | 42007200 | [@dontuseitiguess](https://github.com/dontuseitiguess) | Import des événements, cache, lieu conseillé |
 
 ## Fonctionnalités (MVP)
 
