@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: backend
+
+  datasource:
+    url: jdbc:postgresql://db:5432/orbittrack
+    username: ${DB_USERNAME:orbittrack}
+    password: ${DB_PASSWORD:orbittrack_dev}
+
+  jpa:
+    open-in-view: false 
+    hibernate:
+      ddl-auto: update
+
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+server:
+  port: 8080
