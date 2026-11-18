@@ -1,0 +1,65 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    container_name: orbittrack-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      # Le serveur de dev Vite redirige /api vers le backend (voir frontend/vite.config.ts)
+      API_PROXY_TARGET: http://backend:8080
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    container_name: orbittrack-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Valeurs lues dans le fichier .env à la racine (copier .env.example en .env)
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant - copier .env.example en .env}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-PT2H}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:17
+    container_name: orbittrack-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: orbittrack
+      POSTGRES_PASSWORD: orbittrack_dev
+      POSTGRES_DB: orbittrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orbittrack -d orbittrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: orbittrack-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
