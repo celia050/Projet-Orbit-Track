@@ -12,11 +12,53 @@ Orbit Track permet de suivre les événements astronomiques à venir, de trouver
 
 ## Équipe
 
-| # | Membre | N° étudiant | GitHub | Feature majeure |
+| # | Membre | N° étudiant | GitHub | Partie du site | Features |
+|---|---|---|---|---|---|
+| 1 | Ritej BAABOURA | 42007200 | [@dontuseitiguess](https://github.com/dontuseitiguess) | « Quoi voir, quand et où ? » : les phénomènes, leur fiabilité, le lieu conseillé | 1 à 6 |
+| 2 | Selma BAIBOU | 43001407 | [@selmabayb](https://github.com/selmabayb) | « Y aller ensemble » : comptes, sorties, forum, alertes | 7 à 12 |
+| 3 | Celia CHIOUKH | 43006515 | [@celia050](https://github.com/celia050) | « Se préparer et apprendre » : carte, agenda, article du jour, mise en ligne du site | 13 à 18 |
+
+Chaque membre a 6 features : 3 grandes et 3 petites. Le détail (description, outils, règles métier) est dans le [tableau des features](https://github.com/celia050/Projet-Orbit-Track/blob/main/tableau-features-orbit-track.pdf).
+
+## Répartition des features
+
+| # | Feature | Responsable | Taille | Type |
 |---|---|---|---|---|
-| 1 | Selma BAIBOU | 43001407 | [@selmabayb](https://github.com/selmabayb) | Participation, forum et alertes |
-| 2 | Celia CHIOUKH | 43006515 | [@celia050](https://github.com/celia050) | Carte Leaflet, export .ics, articles IA |
-| 3 | Ritej BAABOURA | 42007200 | [@dontuseitiguess](https://github.com/dontuseitiguess) | Import des événements, cache, lieu conseillé |
+| 1 | Voir les phénomènes à venir près de chez soi | Ritej | Grande | Métier |
+| 2 | Consulter la fiche d'un phénomène | Ritej | Petite | Métier |
+| 3 | Savoir où aller observer (lieu conseillé) | Ritej | Grande | Métier |
+| 4 | Gérer la liste des lieux d'observation | Ritej | Petite | Métier |
+| 5 | Récupérer automatiquement les prévisions | Ritej | Grande | Technique |
+| 6 | Rester utilisable si une source tombe en panne | Ritej | Petite | Technique |
+| 7 | S'inscrire à une sortie d'observation | Selma | Petite | Métier |
+| 8 | Discuter avec les autres participants (forum) | Selma | Grande | Métier |
+| 9 | Empêcher le spam dans les forums | Selma | Petite | Technique |
+| 10 | Être prévenu d'un changement | Selma | Petite | Métier |
+| 11 | Créer une alerte | Selma | Grande | Métier |
+| 12 | Créer un compte et se connecter | Selma | Grande | Technique |
+| 13 | Voir les phénomènes sur une carte | Celia | Grande | Métier |
+| 14 | Ajouter un phénomène à son agenda (.ics) | Celia | Petite | Métier |
+| 15 | Lire l'article du jour (assisté par IA) | Celia | Grande | Métier |
+| 16 | Installer et lancer le site facilement | Celia | Petite | Technique |
+| 17 | Vérifier automatiquement le code (CI) | Celia | Grande | Technique |
+| 18 | Surveiller le bon fonctionnement | Celia | Petite | Technique |
+
+**Avancement :** features 16 et 12 terminées et fusionnées dans `develop`.
+
+## Organisation Git
+
+- `main` : versions publiées (releases taguées `v0.1.0`, `v0.2.0`…).
+- `develop` : branche de travail commune.
+- Une branche par feature, créée depuis `develop` à jour :
+
+```bash
+git checkout develop
+git pull
+git checkout -b feature/nom-de-la-feature
+```
+
+- Une Pull Request vers `develop` par feature, relue par un autre membre avant fusion.
+- Pour une version intermédiaire : Pull Request `develop` → `main`, puis release GitHub avec un tag (`v0.1.0`).
 
 ## Fonctionnalités (MVP)
 
@@ -142,7 +184,7 @@ docker compose up -d
 
 ## Comptes et connexion (feature 12)
 
-Responsable : Selma BAIBOU.
+Responsable : Selma BAIBOU. Feature terminée.
 
 ### Règles
 
