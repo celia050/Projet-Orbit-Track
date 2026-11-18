@@ -1,0 +1,10 @@
+# Profil utilisé par les tests (@ActiveProfiles("test")).
+# La base PostgreSQL est fournie par Testcontainers (voir TestcontainersConfiguration).
+orbittrack:
+  security:
+    jwt:
+      secret: secret-de-test-uniquement-0123456789-abcdef
+      expiration: PT15M
+    admin:
+      email: admin@test.local
+      password: mot-de-passe-admin-test

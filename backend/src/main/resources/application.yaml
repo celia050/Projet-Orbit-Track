@@ -8,9 +8,11 @@ spring:
     password: ${DB_PASSWORD:orbittrack_dev}
 
   jpa:
-    open-in-view: false 
+    open-in-view: false
     hibernate:
-      ddl-auto: update
+      # Les tables sont créées par les migrations Flyway (src/main/resources/db/migration).
+      # Hibernate vérifie seulement que les entités correspondent aux tables.
+      ddl-auto: validate
 
   data:
     redis:
@@ -19,3 +21,15 @@ spring:
 
 server:
   port: 8080
+
+orbittrack:
+  security:
+    jwt:
+      # Obligatoire : au moins 32 caractères. À définir dans le fichier .env (voir .env.example).
+      secret: ${JWT_SECRET:}
+      # Durée de validité d'un jeton de connexion (format ISO-8601 : PT2H = 2 heures).
+      expiration: ${JWT_EXPIRATION:PT2H}
+    admin:
+      # Premier administrateur créé au démarrage s'il n'en existe aucun. Laisser vide pour ne rien créer.
+      email: ${ADMIN_EMAIL:}
+      password: ${ADMIN_PASSWORD:}
