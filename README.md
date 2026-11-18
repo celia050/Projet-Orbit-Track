@@ -75,7 +75,18 @@ cd Projet-Orbit-Track
 
 ### 2. Démarrer avec Docker Compose
 
-À la racine du projet :
+Créer d'abord le fichier `.env` (il contient les secrets et n'est jamais versionné) :
+
+```bash
+cp .env.example .env
+```
+
+Puis remplir dans `.env` :
+
+- `JWT_SECRET` : au moins 32 caractères aléatoires (`openssl rand -base64 48`) ;
+- `ADMIN_PASSWORD` : mot de passe du premier administrateur (créé au démarrage).
+
+Ensuite, à la racine du projet :
 
 ```bash
 docker compose up -d --build
@@ -128,3 +139,65 @@ Pour redémarrer :
 ```bash
 docker compose up -d
 ```
+
+## Comptes et connexion (feature 12)
+
+Responsable : Selma BAIBOU.
+
+### Règles
+
+- Consulter le site (requêtes `GET /api/...`) ne demande pas de compte.
+- S'inscrire à une sortie, écrire dans un forum, créer une alerte : il faut être connecté.
+- Les routes `/api/admin/**` sont réservées au rôle `ADMIN`.
+- Toute inscription crée un compte `USER`. Seul un administrateur peut donner le rôle `ADMIN`.
+- Le site garde toujours au moins un administrateur.
+- Les mots de passe sont hachés avec BCrypt ; ils ne sont jamais stockés ni renvoyés en clair.
+- Un changement de rôle prend effet à la connexion suivante (le rôle est inscrit dans le jeton).
+
+### API
+
+| Méthode | Route | Accès | Rôle |
+|---|---|---|---|
+| POST | `/api/auth/register` | libre | Créer un compte (renvoie un jeton) |
+| POST | `/api/auth/login` | libre | Se connecter (renvoie un jeton) |
+| GET | `/api/auth/me` | connecté | Utilisateur connecté |
+| GET | `/api/admin/users` | ADMIN | Liste des comptes |
+| PATCH | `/api/admin/users/{id}/role` | ADMIN | Changer le rôle (`{"role":"ADMIN"}`) |
+
+Le jeton se renvoie dans l'en-tête `Authorization: Bearer <jeton>`.
+
+### Pour les autres features
+
+**Côté serveur.** Les routes qui modifient quelque chose (POST, PUT, PATCH, DELETE) demandent déjà d'être connecté. Les routes de **lecture privées** (mes notifications, mes alertes…) doivent être placées sous `/api/me/...` : elles demandent alors un compte, même en GET. Pour connaître l'utilisateur connecté :
+
+```java
+@PostMapping("/api/events/{id}/participation")
+public void participer(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+    Long userId = CurrentUser.id(jwt);      // identifiant de l'utilisateur
+    boolean admin = CurrentUser.isAdmin(jwt);
+}
+```
+
+**Côté écrans.** `authFetch` ajoute le jeton automatiquement, et `useAuth()` donne l'utilisateur connecté :
+
+```tsx
+import { authFetch } from './auth/api'
+import { useAuth } from './auth/useAuth'
+
+const { user, isAdmin } = useAuth()
+await authFetch(`/api/events/${id}/participation`, { method: 'POST' })
+```
+
+### Base de données
+
+Les tables sont créées par des **migrations Flyway** (`backend/src/main/resources/db/migration`), numérotées `V1__...`, `V2__...`. Hibernate vérifie seulement que les entités correspondent (`ddl-auto: validate`). Chaque feature ajoute ses propres fichiers de migration ; ne jamais modifier une migration déjà fusionnée.
+
+### Tests
+
+```bash
+cd backend
+./mvnw test
+```
+
+Les tests démarrent un vrai PostgreSQL avec Testcontainers : **Docker Desktop doit être lancé**.
+
