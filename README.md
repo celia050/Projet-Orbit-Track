@@ -43,7 +43,7 @@ Chaque membre a 6 features : 3 grandes et 3 petites. Le détail (description, ou
 | 17 | Vérifier automatiquement le code (CI) | Celia | Grande | Technique |
 | 18 | Surveiller le bon fonctionnement | Celia | Petite | Technique |
 
-**Avancement :** features 16 et 12 terminées et fusionnées dans `develop`.
+**Avancement (v0.1.0) :** features 16 (installation) et 12 (comptes et connexion) terminées ; feature 1 en cours (modèle des événements et données de démonstration) ; feature 17 (intégration continue) en place. Détail dans le [CHANGELOG](CHANGELOG.md) et le [dossier de projet](doc/dossier-lancement.md).
 
 ## Organisation Git
 
