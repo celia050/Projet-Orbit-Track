@@ -1,0 +1,28 @@
+---
+- name: Lancer Orbit Track avec Docker Compose
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Vérifier que Docker fonctionne
+      ansible.builtin.command:
+        cmd: docker info
+      changed_when: false
+
+    - name: Démarrer les services Orbit Track
+      ansible.builtin.command:
+        cmd: docker compose up -d --build
+        chdir: "{{ playbook_dir }}/.."
+      changed_when: true
+
+    - name: Afficher les conteneurs
+      ansible.builtin.command:
+        cmd: docker compose ps
+        chdir: "{{ playbook_dir }}/.."
+      register: containers
+      changed_when: false
+
+    - name: Afficher le résultat
+      ansible.builtin.debug:
+        var: containers.stdout_lines

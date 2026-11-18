@@ -45,50 +45,86 @@ Orbit Track permet de suivre les événements astronomiques à venir, de trouver
 
 ## Structure du dépôt
 
-```
-.
-├── frontend/     # Application React + TypeScript
-├── backend/      # API Spring Boot
-├── infra/        # docker-compose, Ansible, Prometheus, Grafana
-└── doc/          # Dossier de lancement (Markdown → PDF) et documentation
+```text
+Projet-Orbit-Track/
+├── frontend/           # Application React + TypeScript
+│   └── Dockerfile
+├── backend/            # API Spring Boot (Java)
+│   └── Dockerfile
+├── ansible/
+│   └── playbook.yml    # Automatisation du lancement
+├── compose.yaml        # Configuration Docker Compose
+├── README.md
+└── ...
 ```
 
-## Lancer le projet en local
+## Installation et lancement en local
 
-Prérequis : Docker et Docker Compose.
+### Prérequis
+
+- Git
+- Docker Desktop installé et démarré
+- Ansible (facultatif)
+
+### 1. Récupérer le projet
 
 ```bash
 git clone https://github.com/celia050/Projet-Orbit-Track.git
 cd Projet-Orbit-Track
-cp .env.example .env      # renseigner les clés d'API (jamais versionnées)
+```
+
+### 2. Démarrer avec Docker Compose
+
+À la racine du projet :
+
+```bash
 docker compose up -d --build
 ```
 
-| Service | URL locale |
+Cette commande construit et démarre les quatre services :
+
+- Frontend React
+- Backend Spring Boot
+- Base de données PostgreSQL
+- Cache Redis
+
+### 3. Accéder à l'application
+
+| Service | Adresse |
 |---|---|
-| Front | http://localhost:5173 |
-| API | http://localhost:8080 |
-| Grafana | http://localhost:3000 |
-| Prometheus | http://localhost:9090 |
+| Frontend React | http://localhost:5173 |
+| Backend Spring Boot | http://localhost:8080 |
+| PostgreSQL | localhost:5432 |
+| Redis | Accessible aux autres conteneurs sur le port 6379 |
 
-*(Ports indicatifs, à ajuster selon le fichier `docker-compose.yml`.)*
+Le backend ne possède pas nécessairement de page d'accueil à l'adresse `/`.
 
-## Tests
+### 4. Lancer avec Ansible (facultatif)
+
+Si Ansible est installé :
 
 ```bash
-cd backend && ./mvnw verify      # JUnit 5 + Testcontainers, couverture JaCoCo
-cd frontend && npm test          # Vitest + Testing Library
+ansible-playbook -i localhost, ansible/playbook.yml
 ```
 
-## Documentation
+Le playbook permet de vérifier que Docker fonctionne, de lancer les services et d'afficher leur état.
 
-- [Dossier de lancement](doc/dossier-lancement.pdf) ([source Markdown](doc/dossier-lancement.md))
-- Protocole d'usage de l'IA : section 6 du dossier de lancement
+### 5. Vérifier les conteneurs
 
-## Contribuer
+```bash
+docker compose ps
+```
 
-Branche `main` protégée, développement sur des branches `feature/*`, Pull Request relue par un autre membre et CI verte avant fusion. Versions taguées en SemVer (`v0.1.0`, …), voir `CHANGELOG.md`.
+### 6. Arrêter l'application
 
-## Licence
+```bash
+docker compose down
+```
 
-Distribué sous licence MIT. Voir [LICENSE](LICENSE).
+Cette commande arrête les services sans supprimer les volumes contenant les données PostgreSQL et Redis.
+
+Pour redémarrer :
+
+```bash
+docker compose up -d
+```
