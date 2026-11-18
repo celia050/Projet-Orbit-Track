@@ -1,0 +1,58 @@
+# Intégration continue d'Orbit Track
+# À chaque push et à chaque Pull Request sur main ou develop :
+#  - backend : compilation + tests (dont tests d'intégration PostgreSQL via Testcontainers)
+#  - frontend : lint + compilation
+#  - docker : construction des images
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend:
+    name: Backend (build + tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build et tests
+        run: |
+          chmod +x mvnw
+          ./mvnw -B verify
+
+  frontend:
+    name: Frontend (lint + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  docker:
+    name: Docker (construction des images)
+    runs-on: ubuntu-latest
+    env:
+      # Valeur factice : uniquement pour que docker compose accepte le fichier
+      JWT_SECRET: valeur-factice-pour-la-ci-uniquement-0123456789
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose build
