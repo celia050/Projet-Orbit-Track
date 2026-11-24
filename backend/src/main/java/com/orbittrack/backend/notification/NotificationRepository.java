@@ -14,6 +14,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     long countByUserIdAndReadAtIsNull(Long userId);
 
+    /** Feature 11 : cette alerte a-t-elle déjà signalé ce phénomène ? */
+    boolean existsByAlertIdAndEventId(Long alertId, Long eventId);
+
     Optional<Notification> findByIdAndUserId(Long id, Long userId);
 
     @Modifying

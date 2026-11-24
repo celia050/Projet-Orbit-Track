@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { LoginForm, RegisterForm } from './auth/AuthForms'
 import { useAuth } from './auth/useAuth'
+import { AlertsPage } from './sorties/AlertsPage'
 import { ForumView } from './sorties/ForumView'
 import { NotificationsPage } from './sorties/NotificationsPage'
 import { OutingsPage } from './sorties/OutingsPage'
@@ -8,7 +9,7 @@ import { fetchUnreadCount, type Outing } from './sorties/api'
 import './App.css'
 
 type AuthMode = 'login' | 'register' | null
-type Page = 'outings' | 'notifications'
+type Page = 'outings' | 'notifications' | 'alerts'
 
 /** Le nombre de notifications non lues est rafraîchi toutes les minutes. */
 const UNREAD_REFRESH_MS = 60_000
@@ -76,6 +77,13 @@ function App() {
               Notifications
               {unread > 0 && <span className="counter">{unread}</span>}
             </button>
+            <button
+              type="button"
+              aria-current={page === 'alerts' ? 'page' : undefined}
+              onClick={() => go('alerts')}
+            >
+              Mes alertes
+            </button>
           </nav>
         )}
         <nav className="account" aria-label="Compte">
@@ -113,6 +121,7 @@ function App() {
         {showPages && user && page === 'notifications' && (
           <NotificationsPage onUnreadChange={() => setUnreadKey((k) => k + 1)} />
         )}
+        {showPages && user && page === 'alerts' && <AlertsPage />}
         {showPages && (!user || page === 'outings') &&
           (user && forumOuting ? (
             <ForumView outing={forumOuting} onBack={() => setForumOuting(null)} />
