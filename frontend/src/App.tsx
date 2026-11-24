@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { LoginForm, RegisterForm } from './auth/AuthForms'
 import { useAuth } from './auth/useAuth'
+import { OutingsPage } from './sorties/OutingsPage'
 import './App.css'
 
 type AuthMode = 'login' | 'register' | null
@@ -45,8 +46,8 @@ function App() {
           <RegisterForm onSuccess={() => setMode(null)} onSwitch={() => setMode('login')} />
         )}
         {(user || mode === null) && (
-          // Emplacement des pages des autres features (calendrier, carte, forum…).
-          <p className="placeholder">Les phénomènes à venir s’afficheront ici.</p>
+          // Emplacement des pages des features (sorties, forum, alertes, carte, calendrier…).
+          <OutingsPage onLoginRequired={() => setMode('login')} />
         )}
       </main>
     </>
