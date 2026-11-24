@@ -20,12 +20,14 @@ public class EventController {
     }
 
     @GetMapping
-    public List<Event> getEvents() {
+    public List<EventResponse> getEvents() {
         return eventService.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Event> getEventById(@PathVariable Long id) {
+    public ResponseEntity<EventResponse> getEventById(
+            @PathVariable Long id) {
+
         return eventService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
