@@ -2,12 +2,9 @@
 package com.orbittrack.backend.event;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-/**
- * Accès aux phénomènes astronomiques stockés en base.
- * Spring Data JPA génère automatiquement les requêtes CRUD.
- */
-@Repository
-public interface EventRepository extends JpaRepository<Event, Long> {
+public interface EventRepository extends
+        JpaRepository<Event, Long>,
+        JpaSpecificationExecutor<Event> {
 }

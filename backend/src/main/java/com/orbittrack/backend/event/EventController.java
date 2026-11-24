@@ -2,11 +2,9 @@
 package com.orbittrack.backend.event;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -20,8 +18,13 @@ public class EventController {
     }
 
     @GetMapping
-    public List<EventResponse> getEvents() {
-        return eventService.findAll();
+    public List<EventResponse> getEvents(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Instant from,
+            @RequestParam(required = false) Instant to) {
+
+        return eventService.findAll(type, status, from, to);
     }
 
     @GetMapping("/{id}")
@@ -30,6 +33,7 @@ public class EventController {
 
         return eventService.findById(id)
                 .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseGet(() ->
+                        ResponseEntity.notFound().build());
     }
 }
