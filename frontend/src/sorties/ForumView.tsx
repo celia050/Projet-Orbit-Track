@@ -107,7 +107,8 @@ export function ForumView({ outing, onBack }: ForumViewProps) {
           onChange={(e) => setDraft(e.target.value)}
         />
         <p className="hint">
-          {draft.length} / {MAX_LENGTH} caractères
+          {draft.length} / {MAX_LENGTH} caractères · 5 messages par minute au maximum, 3 liens par
+          message
         </p>
         <div className="card-actions">
           <button type="submit" className="primary" disabled={sending || draft.trim() === ''}>
