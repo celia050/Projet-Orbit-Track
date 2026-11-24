@@ -150,3 +150,50 @@ export function markNotificationRead(id: number): Promise<AppNotification> {
 export function markAllNotificationsRead(): Promise<void> {
   return call('/api/me/notifications/read-all', { method: 'POST' })
 }
+
+// ---------- Feature 11 : alertes ----------
+
+export interface Alert {
+  id: number
+  name: string
+  eventType: string | null
+  keyword: string | null
+  dateFrom: string | null
+  dateTo: string | null
+  latitude: number | null
+  longitude: number | null
+  radiusKm: number | null
+  active: boolean
+  createdAt: string
+}
+
+export interface AlertForm {
+  name: string
+  eventType: string | null
+  keyword: string | null
+  dateFrom: string | null
+  dateTo: string | null
+  latitude: number | null
+  longitude: number | null
+  radiusKm: number | null
+}
+
+export function fetchAlerts(): Promise<Alert[]> {
+  return call('/api/me/alerts')
+}
+
+export function createAlert(form: AlertForm): Promise<Alert> {
+  return call('/api/me/alerts', { method: 'POST', body: JSON.stringify(form) })
+}
+
+export function setAlertActive(id: number, active: boolean): Promise<Alert> {
+  return call(`/api/me/alerts/${id}`, { method: 'PATCH', body: JSON.stringify({ active }) })
+}
+
+export function deleteAlert(id: number): Promise<void> {
+  return call(`/api/me/alerts/${id}`, { method: 'DELETE' })
+}
+
+export function fetchEventTypes(): Promise<string[]> {
+  return call('/api/outings/event-types')
+}

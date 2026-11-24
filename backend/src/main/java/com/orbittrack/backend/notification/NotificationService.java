@@ -33,6 +33,16 @@ public class NotificationService {
         return notifications.save(new Notification(userId, eventId, type, message));
     }
 
+    /** Feature 11 : prévient d'un phénomène qui correspond à une alerte, une seule fois par phénomène. */
+    @Transactional
+    public boolean notifyAlertMatch(Long userId, Long eventId, Long alertId, String message) {
+        if (notifications.existsByAlertIdAndEventId(alertId, eventId)) {
+            return false;
+        }
+        notifications.save(new Notification(userId, eventId, alertId, NotificationType.ALERT_MATCH, message));
+        return true;
+    }
+
     @Transactional(readOnly = true)
     public List<NotificationResponse> latest(Long userId) {
         return notifications.findTop50ByUserIdOrderByCreatedAtDescIdDesc(userId).stream()

@@ -26,6 +26,10 @@ public class Notification {
     @Column(name = "event_id", updatable = false)
     private Long eventId;
 
+    /** Alerte à l'origine de la notification (feature 11), sinon null. Colonne ajoutée par V13. */
+    @Column(name = "alert_id", updatable = false)
+    private Long alertId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30, updatable = false)
     private NotificationType type;
@@ -44,8 +48,13 @@ public class Notification {
     }
 
     public Notification(Long userId, Long eventId, NotificationType type, String message) {
+        this(userId, eventId, null, type, message);
+    }
+
+    public Notification(Long userId, Long eventId, Long alertId, NotificationType type, String message) {
         this.userId = userId;
         this.eventId = eventId;
+        this.alertId = alertId;
         this.type = type;
         this.message = message;
         this.createdAt = Instant.now();
@@ -67,6 +76,10 @@ public class Notification {
 
     public Long getEventId() {
         return eventId;
+    }
+
+    public Long getAlertId() {
+        return alertId;
     }
 
     public NotificationType getType() {
