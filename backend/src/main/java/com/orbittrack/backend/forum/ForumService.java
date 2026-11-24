@@ -39,12 +39,14 @@ public class ForumService {
     private final ForumMessageRepository messages;
     private final ParticipationService participations;
     private final AppUserRepository users;
+    private final AntiSpamGuard antiSpam;
 
     public ForumService(ForumMessageRepository messages, ParticipationService participations,
-                        AppUserRepository users) {
+                        AppUserRepository users, AntiSpamGuard antiSpam) {
         this.messages = messages;
         this.participations = participations;
         this.users = users;
+        this.antiSpam = antiSpam;
     }
 
     @Transactional(readOnly = true)
@@ -68,6 +70,7 @@ public class ForumService {
     public ForumMessageResponse post(Long eventId, Long userId, boolean admin, String content) {
         requireAccess(eventId, userId, admin);
         String text = content.strip();
+        antiSpam.checkNewMessage(eventId, userId, text);
         ForumMessage message = messages.save(new ForumMessage(eventId, userId, text));
         return toResponse(message, displayName(userId), userId, admin);
     }
@@ -81,7 +84,9 @@ public class ForumService {
         if (message.isDeleted()) {
             throw new BusinessRuleException(HttpStatus.CONFLICT, ALREADY_DELETED);
         }
-        message.edit(content.strip());
+        String text = content.strip();
+        antiSpam.checkLinks(text);
+        message.edit(text);
         return toResponse(message, displayName(userId), userId, admin);
     }
 

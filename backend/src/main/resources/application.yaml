@@ -39,3 +39,7 @@ orbittrack:
       # Premier administrateur créé au démarrage s'il n'en existe aucun. Laisser vide pour ne rien créer.
       email: ${ADMIN_EMAIL:}
       password: ${ADMIN_PASSWORD:}
+  forum:
+    # Anti-spam du forum (feature 9).
+    max-messages-per-minute: 5
+    duplicate-window: PT10M
