@@ -17,12 +17,6 @@ public class EventController {
         this.eventService = eventService;
     }
 
-    /**
-     * Liste publique des événements astronomiques.
-     *
-     * Filtres disponibles :
-     * type, status, from, to, lat, lon, radiusKm.
-     */
     @GetMapping
     public List<EventResponse> getEvents(
             @RequestParam(required = false) String type,
@@ -34,19 +28,28 @@ public class EventController {
             @RequestParam(required = false) Double radiusKm) {
 
         return eventService.findAll(
-                type,
-                status,
-                from,
-                to,
-                lat,
-                lon,
-                radiusKm
+                type, status, from, to, lat, lon, radiusKm
         );
     }
 
-    /**
-     * Fiche détaillée d'un événement.
-     */
+    @GetMapping("/search")
+    public EventPageResponse searchEvents(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Instant from,
+            @RequestParam(required = false) Instant to,
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lon,
+            @RequestParam(required = false) Double radiusKm,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return eventService.search(
+                type, status, from, to,
+                lat, lon, radiusKm, page, size
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<EventResponse> getEventById(
             @PathVariable Long id) {

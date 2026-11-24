@@ -11,10 +11,14 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
 public class EventService {
+
+    private static final Set<String> STATUSES =
+            Set.of("SCHEDULED", "UPDATED", "CANCELLED");
 
     private final EventRepository eventRepository;
 
@@ -22,122 +26,128 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
-    /**
-     * Recherche les événements avec filtres combinables.
-     *
-     * La recherche géographique utilise les zones circulaires
-     * simplifiées enregistrées en base de données.
-     */
     public List<EventResponse> findAll(
-            String type,
-            String status,
-            Instant from,
-            Instant to,
-            Double lat,
-            Double lon,
-            Double radiusKm) {
+            String type, String status,
+            Instant from, Instant to,
+            Double lat, Double lon, Double radiusKm) {
 
-        validateFilters(from, to, lat, lon, radiusKm);
+        validateFilters(type, status, from, to, lat, lon, radiusKm);
 
         Specification<Event> spec =
                 (root, query, cb) -> cb.conjunction();
 
         if (type != null && !type.isBlank()) {
-            String normalizedType = type.trim().toUpperCase();
+            String value = type.trim().toUpperCase();
             spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("type"), normalizedType));
+                    cb.equal(root.get("type"), value));
         }
 
         if (status != null && !status.isBlank()) {
-            String normalizedStatus = status.trim().toUpperCase();
+            String value = status.trim().toUpperCase();
             spec = spec.and((root, query, cb) ->
-                    cb.equal(root.get("status"), normalizedStatus));
+                    cb.equal(root.get("status"), value));
         }
 
         if (from != null) {
             spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(
-                            root.get("startAt"), from));
+                    cb.greaterThanOrEqualTo(root.get("startAt"), from));
         }
 
         if (to != null) {
             spec = spec.and((root, query, cb) ->
-                    cb.lessThanOrEqualTo(
-                            root.get("startAt"), to));
+                    cb.lessThanOrEqualTo(root.get("startAt"), to));
         }
 
-        List<Event> events = eventRepository.findAll(
-                spec,
-                Sort.by("startAt").ascending()
-        );
-
-        return events.stream()
-                .filter(event ->
-                        matchesLocation(event, lat, lon, radiusKm))
-                .map(EventResponse::from)
-                .toList();
+        return eventRepository.findAll(
+                spec, Sort.by("startAt").ascending()
+        ).stream()
+         .filter(event -> matchesLocation(event, lat, lon, radiusKm))
+         .map(EventResponse::from)
+         .toList();
     }
 
-    /**
-     * Retourne le détail d'un phénomène.
-     */
+    public EventPageResponse search(
+            String type, String status,
+            Instant from, Instant to,
+            Double lat, Double lon, Double radiusKm,
+            int page, int size) {
+
+        if (page < 0 || size < 1 || size > 100) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "page >= 0 et size entre 1 et 100 requis"
+            );
+        }
+
+        List<EventResponse> results =
+                findAll(type, status, from, to, lat, lon, radiusKm);
+
+        long total = results.size();
+        long offset = (long) page * size;
+
+        int start = (int) Math.min(offset, total);
+        int end = (int) Math.min(offset + size, total);
+
+        int totalPages = (int) ((total + size - 1) / size);
+
+        return new EventPageResponse(
+                results.subList(start, end),
+                page,
+                size,
+                total,
+                totalPages
+        );
+    }
+
     public Optional<EventResponse> findById(Long id) {
         return eventRepository.findById(id)
                 .map(EventResponse::from);
     }
 
-    /**
-     * Vérifie les paramètres de recherche.
-     */
     private void validateFilters(
-            Instant from,
-            Instant to,
-            Double lat,
-            Double lon,
-            Double radiusKm) {
+            String type, String status,
+            Instant from, Instant to,
+            Double lat, Double lon, Double radiusKm) {
 
         if (from != null && to != null && from.isAfter(to)) {
-            badRequest("La date de début doit précéder la date de fin");
+            badRequest("Période invalide");
+        }
+
+        if (type != null && type.length() > 40) {
+            badRequest("Type invalide");
+        }
+
+        if (status != null && !status.isBlank()
+                && !STATUSES.contains(status.trim().toUpperCase())) {
+            badRequest("Statut invalide");
         }
 
         if ((lat == null) != (lon == null)) {
-            badRequest("Latitude et longitude doivent être fournies ensemble");
+            badRequest("Latitude et longitude requises ensemble");
         }
 
-        if (lat != null) {
-            if (!Double.isFinite(lat) || lat < -90 || lat > 90
-                    || !Double.isFinite(lon)
-                    || lon < -180 || lon > 180) {
-                badRequest("Coordonnées géographiques invalides");
-            }
+        if (lat != null &&
+                (!Double.isFinite(lat) || lat < -90 || lat > 90
+                || !Double.isFinite(lon) || lon < -180 || lon > 180)) {
+            badRequest("Coordonnées invalides");
         }
 
         if (radiusKm != null) {
             if (!Double.isFinite(radiusKm)
-                    || radiusKm <= 0
-                    || radiusKm > 1000) {
-                badRequest("Le rayon doit être compris entre 0 et 1000 km");
+                    || radiusKm <= 0 || radiusKm > 1000) {
+                badRequest("Rayon invalide");
             }
 
             if (lat == null) {
-                badRequest("Les coordonnées sont obligatoires avec radiusKm");
+                badRequest("Coordonnées requises avec radiusKm");
             }
         }
     }
 
-    /**
-     * Vérifie si la zone recherchée intersecte
-     * la zone de visibilité simplifiée de l'événement.
-     */
     private boolean matchesLocation(
-            Event event,
-            Double lat,
-            Double lon,
-            Double radiusKm) {
+            Event event, Double lat, Double lon, Double radiusKm) {
 
-        if (lat == null) {
-            return true;
-        }
+        if (lat == null) return true;
 
         if (event.getLatitude() == null
                 || event.getLongitude() == null
@@ -146,22 +156,18 @@ public class EventService {
         }
 
         double distance = GeoUtils.distanceKm(
-                lat,
-                lon,
+                lat, lon,
                 event.getLatitude(),
                 event.getLongitude()
         );
 
-        double searchRadius = radiusKm == null ? 0.0 : radiusKm;
-
-        return distance <=
-                event.getVisibilityRadiusKm() + searchRadius;
+        return distance <= event.getVisibilityRadiusKm()
+                + (radiusKm == null ? 0 : radiusKm);
     }
 
     private void badRequest(String message) {
         throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                message
+                HttpStatus.BAD_REQUEST, message
         );
     }
 }
