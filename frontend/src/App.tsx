@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { LoginForm, RegisterForm } from './auth/AuthForms'
 import { useAuth } from './auth/useAuth'
+import { ForumView } from './sorties/ForumView'
 import { OutingsPage } from './sorties/OutingsPage'
+import type { Outing } from './sorties/api'
 import './App.css'
 
 type AuthMode = 'login' | 'register' | null
@@ -9,6 +11,13 @@ type AuthMode = 'login' | 'register' | null
 function App() {
   const { user, loading, isAdmin, logout } = useAuth()
   const [mode, setMode] = useState<AuthMode>(null)
+  // Sortie dont le forum est ouvert (feature 8), sinon la liste des sorties est affichée.
+  const [forumOuting, setForumOuting] = useState<Outing | null>(null)
+
+  function handleLogout() {
+    logout()
+    setForumOuting(null)
+  }
 
   return (
     <>
@@ -21,7 +30,7 @@ function App() {
                 Bonjour <strong>{user.displayName}</strong>
                 {isAdmin && <span className="badge">Admin</span>}
               </span>
-              <button type="button" onClick={logout}>
+              <button type="button" onClick={handleLogout}>
                 Se déconnecter
               </button>
             </>
@@ -45,10 +54,13 @@ function App() {
         {!user && mode === 'register' && (
           <RegisterForm onSuccess={() => setMode(null)} onSwitch={() => setMode('login')} />
         )}
-        {(user || mode === null) && (
+        {(user || mode === null) &&
           // Emplacement des pages des features (sorties, forum, alertes, carte, calendrier…).
-          <OutingsPage onLoginRequired={() => setMode('login')} />
-        )}
+          (user && forumOuting ? (
+            <ForumView outing={forumOuting} onBack={() => setForumOuting(null)} />
+          ) : (
+            <OutingsPage onLoginRequired={() => setMode('login')} onOpenForum={setForumOuting} />
+          ))}
       </main>
     </>
   )

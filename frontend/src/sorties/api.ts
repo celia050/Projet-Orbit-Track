@@ -80,3 +80,44 @@ export function typeLabel(type: string): string {
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'full', timeStyle: 'short' })
 }
+
+// ---------- Feature 8 : forum de chaque sortie ----------
+
+export interface ForumMessage {
+  id: number
+  eventId: number
+  authorId: number
+  authorName: string
+  content: string
+  createdAt: string
+  edited: boolean
+  deleted: boolean
+  canEdit: boolean
+  canDelete: boolean
+}
+
+export interface ForumPage {
+  items: ForumMessage[]
+  page: number
+  size: number
+  totalItems: number
+  totalPages: number
+}
+
+export const FORUM_PAGE_SIZE = 20
+
+export function fetchForum(eventId: number, page: number): Promise<ForumPage> {
+  return call(`/api/events/${eventId}/forum?page=${page}&size=${FORUM_PAGE_SIZE}`)
+}
+
+export function postForumMessage(eventId: number, content: string): Promise<ForumMessage> {
+  return call(`/api/events/${eventId}/forum`, { method: 'POST', body: JSON.stringify({ content }) })
+}
+
+export function editForumMessage(messageId: number, content: string): Promise<ForumMessage> {
+  return call(`/api/forum/messages/${messageId}`, { method: 'PUT', body: JSON.stringify({ content }) })
+}
+
+export function deleteForumMessage(messageId: number): Promise<void> {
+  return call(`/api/forum/messages/${messageId}`, { method: 'DELETE' })
+}
