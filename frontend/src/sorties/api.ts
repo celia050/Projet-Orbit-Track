@@ -121,3 +121,32 @@ export function editForumMessage(messageId: number, content: string): Promise<Fo
 export function deleteForumMessage(messageId: number): Promise<void> {
   return call(`/api/forum/messages/${messageId}`, { method: 'DELETE' })
 }
+
+// ---------- Feature 10 : notifications ----------
+
+export type NotificationType = 'EVENT_CHANGED' | 'EVENT_CANCELLED' | 'ALERT_MATCH'
+
+export interface AppNotification {
+  id: number
+  eventId: number | null
+  type: NotificationType
+  message: string
+  createdAt: string
+  read: boolean
+}
+
+export function fetchNotifications(): Promise<AppNotification[]> {
+  return call('/api/me/notifications')
+}
+
+export function fetchUnreadCount(): Promise<{ count: number }> {
+  return call('/api/me/notifications/unread-count')
+}
+
+export function markNotificationRead(id: number): Promise<AppNotification> {
+  return call(`/api/me/notifications/${id}/read`, { method: 'POST' })
+}
+
+export function markAllNotificationsRead(): Promise<void> {
+  return call('/api/me/notifications/read-all', { method: 'POST' })
+}
