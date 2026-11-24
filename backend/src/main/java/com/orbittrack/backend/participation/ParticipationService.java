@@ -57,6 +57,7 @@ public class ParticipationService {
         } else {
             participation.activate();
         }
+        participation.rememberEvent(event);
         participations.saveAndFlush(participation);
         return status(eventId, userId);
     }

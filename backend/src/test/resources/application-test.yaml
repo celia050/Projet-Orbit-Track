@@ -8,3 +8,6 @@ orbittrack:
     admin:
       email: admin@test.local
       password: mot-de-passe-admin-test
+  # Les tâches automatiques (features 10 et 11) sont appelées directement par les tests.
+  scheduling:
+    enabled: false
