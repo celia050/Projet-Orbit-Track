@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
  *   <li>/api/me/** : données personnelles (mes notifications, mes alertes…) : il faut être connecté,
  *       même en lecture. Les autres features doivent y placer leurs routes privées.</li>
  *   <li>Créer un compte, se connecter : libre.</li>
+ *   <li>/api/events/{id}/forum : forum d'une sortie (feature 8), il faut être connecté même en lecture.</li>
  *   <li>/api/admin/** : réservé au rôle ADMIN.</li>
  *   <li>Tout le reste (participer, écrire, créer une alerte…) : il faut être connecté.</li>
  * </ul>
@@ -55,6 +56,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/me", "/api/me/**").authenticated()
+                        // Forum d'une sortie (feature 8) : réservé aux participants, même en lecture.
+                        .requestMatchers(HttpMethod.GET, "/api/events/*/forum").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/**").permitAll()
                         // Laisse passer les pages d'erreur de Spring pour garder le bon code HTTP.
                         .requestMatchers("/error").permitAll()
