@@ -6,7 +6,7 @@ services:
     ports:
       - "5173:5173"
     environment:
-      # Le serveur de dev Vite redirige /api vers le backend (voir frontend/vite.config.ts)
+      # Le serveur de dev Vite redirige /api vers le backend
       API_PROXY_TARGET: http://backend:8080
     restart: unless-stopped
 
@@ -17,16 +17,20 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Valeurs lues dans le fichier .env à la racine (copier .env.example en .env)
+      # Valeurs lues dans le fichier .env à la racine
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET manquant - copier .env.example en .env}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-PT2H}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen2.5:3b
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+      ollama:
+        condition: service_started
     restart: unless-stopped
 
   db:
@@ -60,6 +64,14 @@ services:
       timeout: 3s
       retries: 5
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: orbittrack-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+
 volumes:
   postgres_data:
   redis_data:
+  ollama_data:
