@@ -179,4 +179,4 @@ Une feature ne peut commencer que si ce dont elle dépend existe :
 
 Le `README.md` présente l’équipe, la répartition des features, l’organisation Git, les instructions de lancement (`docker compose up --build`) et la documentation de la feature 12. Le dossier du rendu 2 reste conservé dans `/doc/dossier-lancement.md`. Le présent dossier est maintenu séparément dans `/doc/dossier-rendu3.md`.
 
-**Release du rendu 3 (lien prévu, à vérifier après publication) :** [v0.2.0](https://github.com/celia050/Projet-Orbit-Track/releases/tag/v0.2.0).
+**Release GitHub de la version v0.2.0 :** [Accéder à la release](https://github.com/celia050/Projet-Orbit-Track/releases/tag/v0.2.0)
