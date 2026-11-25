@@ -117,7 +117,7 @@ class AuthIntegrationTest {
     @Test
     void consulterNeDemandePasDeCompte() throws Exception {
         // Aucune route GET publique n'existe encore : on obtient 404 (et pas 401), donc l'accès est libre.
-        mvc.perform(get("/api/events")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/events")).andExpect(status().isOk());
     }
 
     @Test

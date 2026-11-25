@@ -1,0 +1,62 @@
+
+package com.orbittrack.backend.event;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/events")
+public class EventController {
+
+    private final EventService eventService;
+
+    public EventController(EventService eventService) {
+        this.eventService = eventService;
+    }
+
+    @GetMapping
+    public List<EventResponse> getEvents(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Instant from,
+            @RequestParam(required = false) Instant to,
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lon,
+            @RequestParam(required = false) Double radiusKm) {
+
+        return eventService.findAll(
+                type, status, from, to, lat, lon, radiusKm
+        );
+    }
+
+    @GetMapping("/search")
+    public EventPageResponse searchEvents(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Instant from,
+            @RequestParam(required = false) Instant to,
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lon,
+            @RequestParam(required = false) Double radiusKm,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return eventService.search(
+                type, status, from, to,
+                lat, lon, radiusKm, page, size
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EventResponse> getEventById(
+            @PathVariable Long id) {
+
+        return eventService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() ->
+                        ResponseEntity.notFound().build());
+    }
+}
