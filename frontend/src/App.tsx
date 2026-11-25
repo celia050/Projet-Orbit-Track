@@ -1,18 +1,101 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LoginForm, RegisterForm } from './auth/AuthForms'
 import { useAuth } from './auth/useAuth'
+import ArticleDuJour from './components/ArticleDuJour'
+import AdminArticles from './components/AdminArticles'
+import { AlertsPage } from './sorties/AlertsPage'
+import { ForumView } from './sorties/ForumView'
+import { NotificationsPage } from './sorties/NotificationsPage'
+import { OutingsPage } from './sorties/OutingsPage'
+import { fetchUnreadCount, type Outing } from './sorties/api'
 import './App.css'
 
 type AuthMode = 'login' | 'register' | null
+type Page = 'outings' | 'notifications' | 'alerts'
+
+/** Le nombre de notifications non lues est rafraîchi toutes les minutes. */
+const UNREAD_REFRESH_MS = 60_000
 
 function App() {
   const { user, loading, isAdmin, logout } = useAuth()
   const [mode, setMode] = useState<AuthMode>(null)
+  const [page, setPage] = useState<Page>('outings')
+
+  // Sortie dont le forum est ouvert (feature 8).
+  const [forumOuting, setForumOuting] = useState<Outing | null>(null)
+  const [unread, setUnread] = useState(0)
+  const [unreadKey, setUnreadKey] = useState(0)
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+
+    const refresh = () => {
+      fetchUnreadCount()
+        .then((result) => {
+          if (!cancelled) setUnread(result.count)
+        })
+        .catch(() => {
+          /* la pastille n'est pas indispensable */
+        })
+    }
+
+    refresh()
+    const timer = window.setInterval(refresh, UNREAD_REFRESH_MS)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(timer)
+    }
+  }, [user, unreadKey])
+
+  function go(next: Page) {
+    setPage(next)
+    setForumOuting(null)
+    setMode(null)
+  }
+
+  function handleLogout() {
+    logout()
+    go('outings')
+  }
+
+  const showPages = user !== null || mode === null
 
   return (
     <>
       <header className="topbar">
         <span className="brand">Orbit Track</span>
+
+        {user && (
+          <nav className="mainnav" aria-label="Menu principal">
+            <button
+              type="button"
+              aria-current={page === 'outings' ? 'page' : undefined}
+              onClick={() => go('outings')}
+            >
+              Sorties
+            </button>
+
+            <button
+              type="button"
+              aria-current={page === 'notifications' ? 'page' : undefined}
+              onClick={() => go('notifications')}
+            >
+              Notifications
+              {unread > 0 && <span className="counter">{unread}</span>}
+            </button>
+
+            <button
+              type="button"
+              aria-current={page === 'alerts' ? 'page' : undefined}
+              onClick={() => go('alerts')}
+            >
+              Mes alertes
+            </button>
+          </nav>
+        )}
+
         <nav className="account" aria-label="Compte">
           {loading ? null : user ? (
             <>
@@ -20,7 +103,8 @@ function App() {
                 Bonjour <strong>{user.displayName}</strong>
                 {isAdmin && <span className="badge">Admin</span>}
               </span>
-              <button type="button" onClick={logout}>
+
+              <button type="button" onClick={handleLogout}>
                 Se déconnecter
               </button>
             </>
@@ -29,7 +113,12 @@ function App() {
               <button type="button" onClick={() => setMode('login')}>
                 Se connecter
               </button>
-              <button type="button" className="primary" onClick={() => setMode('register')}>
+
+              <button
+                type="button"
+                className="primary"
+                onClick={() => setMode('register')}
+              >
                 Créer un compte
               </button>
             </>
@@ -39,15 +128,50 @@ function App() {
 
       <main className="content">
         {!user && mode === 'login' && (
-          <LoginForm onSuccess={() => setMode(null)} onSwitch={() => setMode('register')} />
+          <LoginForm
+            onSuccess={() => setMode(null)}
+            onSwitch={() => setMode('register')}
+          />
         )}
+
         {!user && mode === 'register' && (
-          <RegisterForm onSuccess={() => setMode(null)} onSwitch={() => setMode('login')} />
+          <RegisterForm
+            onSuccess={() => setMode(null)}
+            onSwitch={() => setMode('login')}
+          />
         )}
-        {(user || mode === null) && (
-          // Emplacement des pages des autres features (calendrier, carte, forum…).
-          <p className="placeholder">Les phénomènes à venir s’afficheront ici.</p>
+
+        {/* Notifications */}
+        {showPages && user && page === 'notifications' && (
+          <NotificationsPage
+            onUnreadChange={() => setUnreadKey((k) => k + 1)}
+          />
         )}
+
+        {/* Alertes */}
+        {showPages && user && page === 'alerts' && <AlertsPage />}
+
+        {/* Sorties et forum */}
+        {showPages && (!user || page === 'outings') &&
+          (user && forumOuting ? (
+            <ForumView
+              outing={forumOuting}
+              onBack={() => setForumOuting(null)}
+            />
+          ) : (
+            <>
+              <OutingsPage
+                onLoginRequired={() => setMode('login')}
+                onOpenForum={setForumOuting}
+              />
+
+              {/* Feature 15 : Article du jour */}
+              <ArticleDuJour />
+
+              {/* Gestion des articles réservée aux administrateurs */}
+              {isAdmin && <AdminArticles />}
+            </>
+          ))}
       </main>
     </>
   )

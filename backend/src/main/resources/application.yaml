@@ -7,6 +7,12 @@ spring:
     username: ${DB_USERNAME:orbittrack}
     password: ${DB_PASSWORD:orbittrack_dev}
 
+  flyway:
+    # Chaque membre a sa plage de numéros de migration (Selma V10-V19, Ritej V20-V29, Celia V30-V39).
+    # Comme on travaille en parallèle, un V10 peut arriver après un V20 déjà appliqué sur une base locale :
+    # out-of-order l'accepte au lieu de bloquer le démarrage.
+    out-of-order: true
+
   jpa:
     open-in-view: false
     hibernate:
@@ -33,3 +39,7 @@ orbittrack:
       # Premier administrateur créé au démarrage s'il n'en existe aucun. Laisser vide pour ne rien créer.
       email: ${ADMIN_EMAIL:}
       password: ${ADMIN_PASSWORD:}
+  forum:
+    # Anti-spam du forum (feature 9).
+    max-messages-per-minute: 5
+    duplicate-window: PT10M

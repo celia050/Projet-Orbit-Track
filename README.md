@@ -134,12 +134,21 @@ Ensuite, à la racine du projet :
 docker compose up -d --build
 ```
 
-Cette commande construit et démarre les quatre services :
+Cette commande construit et démarre les cinq services :
 
 - Frontend React
 - Backend Spring Boot
 - Base de données PostgreSQL
 - Cache Redis
+- Ollama (génération des articles assistée par IA)
+
+Lors de la première installation, télécharger le modèle utilisé pour l’article du jour (environ 1,9 Go) :
+
+```bash
+docker compose exec ollama ollama pull qwen2.5:3b
+```
+
+Le modèle est conservé dans le volume Docker `ollama_data`. Il n’est pas nécessaire de le télécharger à chaque redémarrage.
 
 ### 3. Accéder à l'application
 
