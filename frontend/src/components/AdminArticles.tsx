@@ -19,7 +19,6 @@ function AdminArticles() {
 
   const loadDrafts = useCallback(async () => {
     try {
-      setError('')
       const response = await authFetch('/api/admin/articles/drafts')
 
       if (!response.ok) {
@@ -28,6 +27,7 @@ function AdminArticles() {
 
       const data = (await response.json()) as Article[]
       setArticles(data)
+      setError('')
     } catch {
       setError('Erreur lors du chargement des brouillons.')
     } finally {
@@ -36,8 +36,36 @@ function AdminArticles() {
   }, [])
 
   useEffect(() => {
-    void loadDrafts()
-  }, [loadDrafts])
+    let cancelled = false
+
+    authFetch('/api/admin/articles/drafts')
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error('Impossible de récupérer les brouillons.')
+        }
+
+        const data = (await response.json()) as Article[]
+
+        if (!cancelled) {
+          setArticles(data)
+          setError('')
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError('Erreur lors du chargement des brouillons.')
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   async function saveDraft() {
     if (!selected || busy) return
