@@ -1,4 +1,8 @@
 import CalendarButton from '../components/CalendarButton'
+import { EventFilters } from '../map/EventFilters'
+import { MapPage } from '../map/MapPage'
+import { fetchMapEvents, type MapEvent } from '../map/api'
+import { EMPTY_FILTERS, filterEvents, synchronizeMapEvents } from '../map/filters'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../auth/useAuth'
 import {
@@ -24,6 +28,34 @@ export function OutingsPage({ onLoginRequired, onOpenForum }: OutingsPageProps) 
   const [outings, setOutings] = useState<Outing[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<number | null>(null)
+  const [filters, setFilters] = useState(EMPTY_FILTERS)
+  const [view, setView] = useState<'list' | 'map'>('list')
+  const [mapEvents, setMapEvents] = useState<MapEvent[]>([])
+  const [mapLoading, setMapLoading] = useState(true)
+  const [mapError, setMapError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    fetchMapEvents()
+      .then((events) => {
+        if (!cancelled) setMapEvents(events)
+      })
+      .catch((e: unknown) => {
+        if (!cancelled) setMapError(errorMessage(e))
+      })
+      .finally(() => {
+        if (!cancelled) setMapLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const filteredOutings = filterEvents(outings ?? [], filters)
+  const filteredMapEvents = synchronizeMapEvents(mapEvents, filteredOutings)
+  const eventTypes = [...new Set((outings ?? []).map((o) => o.type))].sort()
 
   // Recharge quand on se connecte ou se déconnecte (le champ « participating » change).
   useEffect(() => {
@@ -85,10 +117,55 @@ export function OutingsPage({ onLoginRequired, onOpenForum }: OutingsPageProps) 
         </p>
       )}
       {outings === null && !error && <p>Chargement…</p>}
-      {outings?.length === 0 && <p>Aucune sortie à venir pour le moment.</p>}
+      <EventFilters
+        filters={filters}
+        types={eventTypes}
+        onChange={setFilters}
+      />
 
-      <ul className="card-list">
-        {outings?.map((outing) => {
+      <div className="map-actions">
+        <button
+          type="button"
+          className={view === 'list' ? 'primary' : undefined}
+          aria-pressed={view === 'list'}
+          onClick={() => setView('list')}
+        >
+          Liste
+        </button>
+
+        <button
+          type="button"
+          className={view === 'map' ? 'primary' : undefined}
+          aria-pressed={view === 'map'}
+          onClick={() => setView('map')}
+        >
+          Carte
+        </button>
+      </div>
+
+      {outings !== null && filteredOutings.length === 0 && (
+        <p>Aucun phénomène correspondant aux filtres.</p>
+      )}
+
+      {view === 'map' && mapLoading && <p>Chargement de la carte…</p>}
+
+      {view === 'map' && mapError && (
+        <p className="auth-error" role="alert">{mapError}</p>
+      )}
+
+      {view === 'map' && !mapLoading && !mapError && outings !== null && (
+        <>
+          {filteredMapEvents.length !== filteredOutings.length && (
+            <p className="hint">
+              Certaines sorties sont temporairement indisponibles sur la carte.
+            </p>
+          )}
+          <MapPage events={filteredMapEvents} />
+        </>
+      )}
+
+      <ul className="card-list" hidden={view !== 'list'} style={view !== 'list' ? { display: 'none' } : undefined}>
+        {filteredOutings.map((outing) => {
           const cancelled = outing.status === 'CANCELLED'
           return (
             <li key={outing.eventId} className="card">

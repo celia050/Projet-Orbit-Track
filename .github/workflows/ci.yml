@@ -1,7 +1,7 @@
 # Intégration continue d'Orbit Track
 # À chaque push et à chaque Pull Request sur main ou develop :
 #  - backend : compilation + tests (dont tests d'intégration PostgreSQL via Testcontainers)
-#  - frontend : lint + compilation
+#  - frontend : lint + tests Vitest + compilation
 #  - docker : construction des images
 name: CI
 
@@ -31,7 +31,7 @@ jobs:
           ./mvnw -B verify
 
   frontend:
-    name: Frontend (lint + build)
+    name: Frontend (lint + tests + build)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,6 +45,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
+      - run: npm test
       - run: npm run build
 
   docker:
