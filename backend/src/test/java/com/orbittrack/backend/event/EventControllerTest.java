@@ -14,7 +14,7 @@ import static org.mockito.Mockito.*;
 class EventControllerTest {
 
     private final EventService service = mock(EventService.class);
-    private final EventController controller = new EventController(service);
+    private final EventController controller = new EventController(service, new CalendarService());
 
     @Test
     void rechercheAvecPagination() {
