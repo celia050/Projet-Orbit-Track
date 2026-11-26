@@ -1,3 +1,4 @@
+import CalendarButton from '../components/CalendarButton'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../auth/useAuth'
 import {
@@ -104,6 +105,9 @@ export function OutingsPage({ onLoginRequired, onOpenForum }: OutingsPageProps) 
                 {outing.participantCount} participant{outing.participantCount > 1 ? 's' : ''}
               </p>
               <div className="card-actions">
+                {!cancelled && (
+                  <CalendarButton eventId={outing.eventId} />
+                )}
                 {(!cancelled || outing.participating) && (
                   <button
                     type="button"
