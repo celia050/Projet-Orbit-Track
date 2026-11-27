@@ -3,7 +3,7 @@
 [![Version](https://img.shields.io/github/v/tag/celia050/Projet-Orbit-Track?label=version&sort=semver)](https://github.com/celia050/Projet-Orbit-Track/tags)
 [![Licence](https://img.shields.io/github/license/celia050/Projet-Orbit-Track)](LICENSE)
 [![CI](https://github.com/celia050/Projet-Orbit-Track/actions/workflows/ci.yml/badge.svg)](https://github.com/celia050/Projet-Orbit-Track/actions/workflows/ci.yml)
-[![Couverture](https://codecov.io/gh/celia050/Projet-Orbit-Track/branch/main/graph/badge.svg)](https://codecov.io/gh/celia050/Projet-Orbit-Track)
+[![Couverture](https://sonarcloud.io/api/project_badges/measure?project=celia050_Projet-Orbit-Track&metric=coverage)](https://sonarcloud.io/summary/overall?id=celia050_Projet-Orbit-Track)
 [![Qualité](https://sonarcloud.io/api/project_badges/measure?project=celia050_Projet-Orbit-Track&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=celia050_Projet-Orbit-Track)
 
 Orbit Track permet de suivre les événements astronomiques à venir, de trouver un lieu d'observation conseillé et de les observer ensemble : participation, forum par événement, alertes, export agenda (.ics), carte interactive et article quotidien relu par un humain.

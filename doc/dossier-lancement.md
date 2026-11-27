@@ -27,7 +27,7 @@ Les éléments notés [à confirmer] (API astronomique externe, fournisseur d'IA
 | API astronomiques externes | Prévisions d'événements (éclipses, pluies d'étoiles filantes, passages, conjonctions…) | Compte projet, clé stockée en secret GitHub [à confirmer] |
 | Fournisseur de LLM | Brouillons des articles du jour | Compte projet [à confirmer], clé en secret, quota plafonné |
 | OpenStreetMap / tuiles | Fond de carte Leaflet (attribution affichée) | Sans compte (usage conforme à la politique de tuiles) |
-| SonarCloud, Codecov | Qualité de code, couverture de tests | Liés au dépôt GitHub (à brancher) |
+| SonarCloud, JaCoCo, Vitest Coverage V8 | Qualité du code, sécurité et couverture des tests | Intégration dans GitHub Actions |
 
 Aucune clé n'est versionnée : le fichier `.env` est ignoré par Git, `.env.example` est fourni, et chaque membre crée ses propres valeurs locales.
 
@@ -123,7 +123,7 @@ Une feature ne peut commencer que si ce dont elle dépend existe :
 | 16 — Installer et lancer le site | Celia | **Terminée** : Docker Compose (front, API, PostgreSQL, Redis), playbook Ansible, lancement en une commande. |
 | 12 — Créer un compte et se connecter | Selma | **Terminée** : inscription, connexion par jeton JWT, déconnexion, rôles USER/ADMIN, premier administrateur créé au démarrage, gestion des rôles par l'admin, règles d'accès ; écrans d'inscription et de connexion ; tests d'intégration sur une vraie base PostgreSQL (Testcontainers). |
 | 1 — Voir les phénomènes à venir | Ritej | **En cours** : modèle des événements validé par l'équipe (table `events`, contrôles de cohérence, anti-doublon par source), 10 phénomènes de démonstration. Reste : route `GET /api/events` et écran de liste. |
-| 17 — Vérifier automatiquement le code (CI) | Celia | **Première version** : pipeline GitHub Actions sur chaque push et Pull Request vers `main` et `develop`. Reste : couverture de tests (JaCoCo, Codecov) et qualité (SonarCloud). |
+| 17 — Vérifier automatiquement le code (CI) | Celia | **Première version** : pipeline GitHub Actions sur chaque push et Pull Request vers `main` et `develop`. Évolution : couverture des tests backend (JaCoCo) et frontend (Vitest Coverage V8), publication des rapports et analyse SonarCloud dans la CI. Validation sur GitHub à effectuer. |
 | Autres features | — | Prévues pour les versions suivantes. |
 
 **Tests de la feature 12.** Inscription (compte USER, mot de passe jamais renvoyé), email déjà utilisé même avec des majuscules (409), formulaire invalide (400), connexion correcte et incorrecte avec le même message, profil réservé aux connectés, jeton falsifié refusé, écriture sans compte refusée, données personnelles protégées même en lecture, administration réservée aux admins, promotion d'un utilisateur, impossibilité de retirer le dernier administrateur, mot de passe trop long pour BCrypt refusé proprement. Le parcours a aussi été vérifié à la main dans le navigateur.

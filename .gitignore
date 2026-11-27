@@ -1,2 +1,4 @@
 # Secrets locaux : ne jamais versionner
 .env
+
+/frontend/coverage/
