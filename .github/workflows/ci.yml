@@ -30,6 +30,18 @@ jobs:
           chmod +x mvnw
           ./mvnw -B verify
 
+      - name: Publication du rapport JaCoCo
+        uses: actions/upload-artifact@v4
+        with:
+          name: couverture-backend
+          path: backend/target/site/jacoco/
+
+      - name: Publication des classes Java
+        uses: actions/upload-artifact@v4
+        with:
+          name: classes-backend
+          path: backend/target/classes/
+
   frontend:
     name: Frontend (lint + tests + build)
     runs-on: ubuntu-latest
@@ -45,8 +57,14 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
-      - run: npm test
+      - run: npm run test:coverage
       - run: npm run build
+
+      - name: Publication du rapport Vitest
+        uses: actions/upload-artifact@v4
+        with:
+          name: couverture-frontend
+          path: frontend/coverage/
 
   docker:
     name: Docker (construction des images)
@@ -57,3 +75,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker compose build
+
+
+  sonarqube:
+    name: SonarCloud (qualite et securite)
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: couverture-backend
+          path: backend/target/site/jacoco/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: classes-backend
+          path: backend/target/classes/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: couverture-frontend
+          path: frontend/coverage/
+
+      - uses: SonarSource/sonarqube-auth-action@v1.2
+        id: auth
+
+      - name: Analyse SonarCloud
+        uses: SonarSource/sonarqube-scan-action@70bad232163b09d998ea0707ee80c0ec80798c16
+        with:
+          args: >
+            -Dsonar.organization=${{ steps.auth.outputs.organization }}
+            -Dsonar.projectKey=${{ steps.auth.outputs.project-key }}

@@ -28,7 +28,7 @@
 | API astronomiques externes | Prévisions d’événements (éclipses, pluies d’étoiles filantes, passages, conjonctions…) | Compte projet, clé stockée en secret GitHub \[à confirmer\]                         |
 | Ollama — Qwen2.5:3b        | Génération locale de brouillons                                                        | Sans compte ni clé d’API externe                                                    |
 | OpenStreetMap / tuiles     | Fond de carte Leaflet (attribution affichée)                                           | Sans compte (usage conforme à la politique de tuiles)                               |
-| SonarCloud, Codecov        | Qualité de code, couverture de tests                                                   | Liés au dépôt GitHub (à brancher)                                                   |
+| SonarCloud, JaCoCo, Vitest Coverage V8 | Qualité du code, sécurité et couverture des tests | Intégration dans GitHub Actions                                                   |
 
 Aucune clé n’est versionnée : le fichier `.env` est ignoré par Git, `.env.example` est fourni, et chaque membre crée ses propres valeurs locales.
 
